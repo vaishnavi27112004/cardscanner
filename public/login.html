@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<title>EXPO Lead Capture – Login</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #273549;
+    --border: #334155;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59,130,246,0.18);
+    --hot: #ef4444;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --success: #22c55e;
+    --radius: 14px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container {
+    width: 100%;
+    max-width: 420px;
+    perspective: 1000px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .brand {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .brand .logo {
+    font-size: 36px;
+    margin-bottom: 4px;
+    display: inline-block;
+  }
+  .brand h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+  .brand p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .tabs {
+    display: flex;
+    background: var(--surface2);
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: var(--text);
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+  .page {
+    display: none;
+  }
+  .page.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .form-group {
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: var(--font);
+    outline: none; 
+    transition: border-color 0.2s; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .pwd-wrapper {
+    position: relative;
+  }
+  .pwd-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .strength-meter {
+    height: 4px;
+    background: var(--surface2);
+    margin-top: 6px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .strength-fill {
+    height: 100%;
+    width: 0;
+    transition: all 0.3s;
+  }
+  .strength-label {
+    font-size: 11px;
+    margin-top: 4px;
+    display: block;
+    text-align: right;
+  }
+  .btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--text);
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .btn:hover {
+    opacity: 0.95;
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+  .spinner.show { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .msg {
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    display: none;
+    line-height: 1.4;
+  }
+  .msg.errorMsg { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; }
+  .msg.successMsg { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.25); color: #86efac; }
+  .msg.show { display: block; }
+  .footer-links {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .footer-links a {
+    color: var(--accent);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .footer-links a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="authCard" class="card">
+    <div class="brand">
+      <span class="logo">📋</span>
+      <h1>EXPO Lead Capture</h1>
+      <p>Trade Show Management Platform</p>
+    </div>
+
+    <div class="tabs">
+      <div id="tabLogin" class="tab active" onclick="switchAuthTab('login')">Sign In</div>
+      <div id="tabRegister" class="tab" onclick="switchAuthTab('register')">Create Account</div>
+    </div>
+
+    <div id="errorMsg" class="msg errorMsg"></div>
+    <div id="successMsg" class="msg successMsg"></div>
+
+    <div id="pageLogin" class="page active">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="name@company.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pwd-wrapper">
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="pwd-toggle" onclick="togglePwd('loginPassword', this)">👁</button>
+        </div>
+      </div>
+      <button id="btnLogin" class="btn" onclick="doLogin()">
+        <span id="loginSpinner" class="spinner"></span>
+        <span id="loginBtnText">Sign In</span>
+      </button>
+      <div class="footer-links">
+        <a href="#" onclick="showForgot()">Forgot password?</a>
+      </div>
+    </div>
+
+    <div id="pageRegister" class="page">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="regName" placeholder="John Doe" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label>Email Address *</label>
+        <input type="email" id="regEmail" placeholder="name@company.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" id="regCompany" placeholder="Acme Corp">
+      </div>
+      <div class="form-group">
+        <label>Password * (min 8 chars)</label>
+        <div class="pwd-wrapper">
+          <input type="password" id="regPassword" placeholder="••••••••" oninput="checkStrength(this.value)" autocomplete="new-password">
+          <button type="button" class="pwd-toggle" onclick="togglePwd('regPassword', this)">👁</button>
+        </div>
+        <div class="strength-meter"><div id="strengthFill" class="strength-fill"></div></div>
+        <span id="strengthLabel" class="strength-label"></span>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password *</label>
+        <input type="password" id="regConfirm" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <button id="btnRegister" class="btn" onclick="doRegister()">
+        <span id="regSpinner" class="spinner"></span>
+        <span id="regBtnText">Create Account</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="forgotCard" class="card" style="display:none;">
+    <div class="brand">
+      <span class="logo">🔒</span>
+      <h2>Reset Password</h2>
+      <p>Enter your email to receive a secure link</p>
+    </div>
+    <div id="forgotError" class="msg errorMsg"></div>
+    <div id="forgotSuccess" class="msg successMsg"></div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="forgotEmail" placeholder="name@company.com">
+    </div>
+    <button id="btnForgot" class="btn" onclick="doForgot()">
+      <span id="forgotSpinner" class="spinner"></span>
+      <span id="forgotBtnText">Send Reset Link</span>
+    </button>
+    <div class="footer-links">
+      <a href="#" onclick="hideForgot()">Back to Sign In</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Smart Base URL Configuration ──
+// login.html is served by Express on the same port, so API calls use the same origin.
+// No hardcoded port needed — works locally AND on Render/cloud with zero changes.
+var API_BASE = 'http://localhost:6060';
+// ── Auto-redirect ──
+(function() {
+  if (localStorage.getItem('expoToken')) window.location.href = 'index.html';
+})();
+
+function switchAuthTab(tab) {
+  document.getElementById('pageLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('pageRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  clearMessages();
+}
+
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+function checkStrength(pwd) {
+  const fill = document.getElementById('strengthFill');
+  const label = document.getElementById('strengthLabel');
+  if (!pwd) { fill.style.width = '0%'; label.textContent = ''; return; }
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  const levels = [
+    { w: '25%', bg: '#ef4444', t: 'Weak' },
+    { w: '50%', bg: '#f59e0b', t: 'Fair' },
+    { w: '75%', bg: '#3b82f6', t: 'Good' },
+    { w: '100%', bg: '#22c55e', t: 'Strong' },
+  ];
+  const l = levels[score - 1] || levels[0];
+  fill.style.width = l.w; fill.style.background = l.bg;
+  label.textContent = l.t; label.style.color = l.bg;
+}
+
+function showError(msg, el = 'errorMsg') {
+  const e = document.getElementById(el); e.textContent = '⚠️ ' + msg; e.classList.add('show');
+}
+function showSuccess(msg, el = 'successMsg') {
+  const e = document.getElementById(el); e.textContent = '✅ ' + msg; e.classList.add('show');
+}
+function clearMessages() {
+  ['errorMsg','successMsg','forgotError','forgotSuccess'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.classList.remove('show');
+  });
+}
+function setLoading(btnId, spinnerId, textId, loading) {
+  document.getElementById(btnId).disabled = loading;
+  document.getElementById(spinnerId).classList.toggle('show', loading);
+  document.getElementById(textId).style.display = loading ? 'none' : '';
+}
+
+// Safe JSON parse — never throws "Unexpected end of JSON input"
+async function safeJson(res) {
+  const text = await res.text();
+  if (!text || !text.trim()) {
+    throw new Error('Server returned an empty response. Is the server running on the correct port?');
+  }
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    console.error('Raw server response:', text);
+    throw new Error('Server returned invalid response. Check the browser console for details.');
+  }
+}
+
+async function doLogin() {
+  clearMessages();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { showError('Please fill in all fields'); return; }
+
+  setLoading('btnLogin', 'loginSpinner', 'loginBtnText', true);
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await safeJson(res);
+    if (!res.ok) throw new Error(data.message || 'Login failed');
+    localStorage.setItem('expoToken', data.token);
+    localStorage.setItem('expoUser', JSON.stringify(data.user));
+    window.location.href = 'index.html';
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    setLoading('btnLogin', 'loginSpinner', 'loginBtnText', false);
+  }
+}
+
+async function doRegister() {
+  clearMessages();
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const company = document.getElementById('regCompany').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regConfirm').value;
+
+  if (!name || !email || !password) { showError('Please fill in all required fields'); return; }
+  if (password.length < 8) { showError('Password must be at least 8 characters'); return; }
+  if (password !== confirm) { showError('Passwords do not match'); return; }
+
+  setLoading('btnRegister', 'regSpinner', 'regBtnText', true);
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, company, password })
+    });
+    const data = await safeJson(res);
+    if (!res.ok) throw new Error(data.message || 'Registration failed');
+    showSuccess('Account created! Signing you in…');
+    localStorage.setItem('expoToken', data.token);
+    localStorage.setItem('expoUser', JSON.stringify(data.user));
+    setTimeout(() => window.location.href = 'index.html', 1200);
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    setLoading('btnRegister', 'regSpinner', 'regBtnText', false);
+  }
+}
+
+function showForgot() {
+  document.getElementById('authCard').style.display = 'none';
+  document.getElementById('forgotCard').style.display = 'block';
+}
+function hideForgot() {
+  document.getElementById('authCard').style.display = 'block';
+  document.getElementById('forgotCard').style.display = 'none';
+  clearMessages();
+}
+async function doForgot() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  clearMessages();
+  if (!email) { showError('Enter your email address', 'forgotError'); return; }
+
+  setLoading('btnForgot', 'forgotSpinner', 'forgotBtnText', true);
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await safeJson(res);
+    if (!res.ok) throw new Error(data.message || 'Failed');
+    showSuccess('Reset link process initiated.', 'forgotSuccess');
+  } catch (err) {
+    showError(err.message, 'forgotError');
+  } finally {
+    setLoading('btnForgot', 'forgotSpinner', 'forgotBtnText', false);
+  }
+}
+</script>
+</body>
+</html>
